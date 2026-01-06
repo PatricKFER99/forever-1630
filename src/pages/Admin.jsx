@@ -6,11 +6,12 @@ import Navbar from '../components/Navbar';
 export default function Admin() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [uploading, setUploading] = useState(false); // Nuevo estado para la carga de foto
+  const [uploading, setUploading] = useState(false);
   
   const [form, setForm] = useState({
     name: '',
-    price: '',
+    price: '',           // Precio Final (Oferta)
+    original_price: '',  // Precio Normal (Tachado)
     category: 'Ropa',
     image_url: ''
   });
@@ -24,31 +25,23 @@ export default function Admin() {
     setProducts(data || []);
   };
 
-  // --- FUNCIÓN NUEVA: SUBIR FOTO A SUPABASE STORAGE ---
   const handleImageUpload = async (event) => {
     try {
       setUploading(true);
       const file = event.target.files[0];
       if (!file) return;
 
-      // 1. Crear nombre único para el archivo (ej: 123456-foto.jpg)
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
 
-      // 2. Subir al bucket 'images'
       const { error: uploadError } = await supabase.storage
         .from('images')
         .upload(filePath, file);
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // 3. Obtener la URL pública para guardarla
       const { data } = supabase.storage.from('images').getPublicUrl(filePath);
-      
-      // 4. Guardar URL en el formulario
       setForm({ ...form, image_url: data.publicUrl });
       alert("¡Foto subida con éxito!");
 
@@ -62,19 +55,24 @@ export default function Admin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.image_url) {
-      alert("Por favor espera a que suba la imagen o agrega una.");
+      alert("Por favor sube una foto.");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.from('products').insert([form]);
+    // Si el campo de precio original está vacío, lo enviamos como null
+    const productData = {
+      ...form,
+      original_price: form.original_price || null 
+    };
+
+    const { error } = await supabase.from('products').insert([productData]);
 
     if (error) {
       alert('Error al guardar: ' + error.message);
     } else {
       alert('¡Producto guardado!');
-      setForm({ name: '', price: '', category: 'Ropa', image_url: '' });
-      // Limpiar el input de archivo visualmente
+      setForm({ name: '', price: '', original_price: '', category: 'Ropa', image_url: '' });
       document.getElementById('fileInput').value = "";
       fetchProducts();
     }
@@ -99,53 +97,68 @@ export default function Admin() {
           <h2 className="text-xl font-bold mb-4">Agregar Nuevo Producto</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             
-            {/* Nombre y Precio */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input 
                 type="text" placeholder="Nombre del producto" required
                 className="p-3 border rounded-lg bg-gray-50 focus:outline-primary"
                 value={form.name} onChange={e => setForm({...form, name: e.target.value})}
               />
-              <input 
-                type="number" placeholder="Precio (S/.)" required
-                className="p-3 border rounded-lg bg-gray-50 focus:outline-primary"
-                value={form.price} onChange={e => setForm({...form, price: e.target.value})}
-              />
-            </div>
-            
-            {/* Categoría y SUBIDA DE FOTO */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <select 
                 className="p-3 border rounded-lg bg-gray-50 focus:outline-primary"
                 value={form.category} onChange={e => setForm({...form, category: e.target.value})}
               >
+                {/* LISTA ACTUALIZADA SEGÚN KATIA */}
+                <option>Fechas Especiales</option> {/* Navidad, San Valentín */}
                 <option>Ropa</option>
                 <option>Zapatillas</option>
                 <option>Carteras</option>
+                <option>Maquillaje</option>
+                <option>Cremas y perfumes</option>
                 <option>Joyería</option>
                 <option>Accesorios</option>
-                <option>Tecnología</option>
-                <option>Belleza</option>
-                <option>Botiquines</option>
+                <option>Salud</option> {/* Antes Botiquines */}
+                <option>Útiles Escolares</option> {/* Antes Papelería */}
+                <option>Educación</option>
+                <option>Talleres</option>
+                <option>Artesanía</option>
+                <option>Merchandising</option>
                 <option>Hogar</option>
                 <option>Postres</option>
                 <option>Juguetes</option>
                 <option>Regalos</option>
-                <option>Papelería</option>
+                <option>Tecnología</option>
                 <option>Mascotas</option>
                 <option>Asesorías</option>
                 <option>Alquiler</option>
+                <option>Otros</option>
               </select>
-
-              {/* INPUT DE ARCHIVO (MAGIA AQUÍ) */}
-              <div className="relative">
+            </div>
+            
+            {/* SECCIÓN DE PRECIOS (NUEVO) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <label className="text-xs text-gray-500 font-bold ml-1">PRECIO OFERTA (El que paga el cliente)</label>
                 <input 
-                  type="file" 
-                  id="fileInput"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  disabled={uploading}
-                  className="hidden" // Lo ocultamos para usar el botón bonito
+                  type="number" placeholder="Ej: 80" required
+                  className="w-full p-3 border rounded-lg focus:outline-primary mt-1"
+                  value={form.price} onChange={e => setForm({...form, price: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-400 font-bold ml-1">PRECIO ANTERIOR (Opcional - Saldrá tachado)</label>
+                <input 
+                  type="number" placeholder="Ej: 120"
+                  className="w-full p-3 border rounded-lg focus:outline-primary mt-1 bg-white"
+                  value={form.original_price} onChange={e => setForm({...form, original_price: e.target.value})}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative col-span-2">
+                <input 
+                  type="file" id="fileInput" accept="image/*"
+                  onChange={handleImageUpload} disabled={uploading} className="hidden"
                 />
                 <label 
                   htmlFor="fileInput"
@@ -159,7 +172,6 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* Previsualización de la foto */}
             {form.image_url && (
               <div className="flex justify-center">
                 <img src={form.image_url} alt="Vista previa" className="h-32 rounded-lg border border-gray-200 object-cover" />
@@ -182,6 +194,10 @@ export default function Admin() {
                 <div>
                   <p className="font-bold text-dark">{product.name}</p>
                   <p className="text-sm text-gray-500">{product.category} - S/. {product.price}</p>
+                  {/* Mostrar si tiene descuento */}
+                  {product.original_price && (
+                    <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">En Oferta</span>
+                  )}
                 </div>
               </div>
               <button onClick={() => handleDelete(product.id)} className="text-red-400 hover:text-red-600 p-2 hover:bg-red-50 rounded-full transition">

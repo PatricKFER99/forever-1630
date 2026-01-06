@@ -12,12 +12,15 @@ function Store() {
   // LISTA ACTUALIZADA CON TODOS LOS RUBROS DE KATIA
 const categories = [
     "Todos", 
+    "Fechas Especiales", // ✨ NUEVO: El botón especial que pidió
     "Ropa", "Zapatillas", "Carteras", 
-    "Joyería", "Accesorios", "Tecnología", 
-    "Belleza", "Botiquines", "Hogar", 
-    "Postres", "Juguetes", "Regalos", 
-    "Papelería", "Mascotas", 
-    "Asesorías", "Alquiler"
+    "Maquillaje", "Cremas y perfumes", // Nuevos
+    "Joyería", "Accesorios", 
+    "Salud", // Antes Botiquines
+    "Útiles Escolares", // Antes Papelería
+    "Educación", "Talleres", "Artesanía", "Merchandising", // Nuevos
+    "Tecnología", "Hogar", "Postres", "Juguetes", "Regalos", 
+    "Mascotas", "Asesorías", "Alquiler", "Otros"
   ];
 
   useEffect(() => {
