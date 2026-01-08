@@ -2,9 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Forzamos el color de fondo claro de la marca */
-body {
-  background-color: #FAF9F6; 
-  color: #4A4A4A;
-  margin: 0;
+:root {
+  /* PALETA BASADA EN EL LOGO (Verde Salvia & Crema) */
+  --color-bg: #fdfcf8;       /* Fondo Crema muy clarito (casi blanco) */
+  --color-primary: #8CA98D;  /* EL VERDE DEL LOGO (Sage Green) */
+  --color-secondary: #E6E1D6;/* Beige suave (para botones secundarios) */
+  --color-dark: #4A5D4F;     /* Verde bosque oscuro (para el texto, más elegante que negro) */
+  --color-accent: #D4C5A9;   /* Dorado mate sutil */
 }
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-dark);
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+/* --- ANIMACIÓN DE BURBUJAS (Ahora en tonos verdes) --- */
+.wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f7f4 100%); /* Degradado sutil verdoso */
+}
+
+.bubble {
+  position: absolute;
+  bottom: -100px;
+  background-color: var(--color-primary);
+  border-radius: 50%;
+  opacity: 0.12; /* Muy sutil y elegante */
+  animation: floatUp 15s infinite ease-in-out;
+}
+
+.bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-duration: 12s; background: var(--color-primary); }
+.bubble:nth-child(2) { width: 120px; height: 120px; left: 25%; animation-duration: 18s; animation-delay: 2s; background: var(--color-accent); }
+.bubble:nth-child(3) { width: 50px; height: 50px; left: 40%; animation-duration: 15s; background: var(--color-primary); }
+.bubble:nth-child(4) { width: 90px; height: 90px; left: 60%; animation-duration: 20s; animation-delay: 1s; background: var(--color-secondary); }
+.bubble:nth-child(5) { width: 110px; height: 110px; left: 80%; animation-duration: 14s; background: var(--color-primary); }
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+  50% { opacity: 0.2; }
+  100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; }
+}
+
+/* Clases de utilidad */
+.text-primary { color: var(--color-primary); }
+.bg-primary { background-color: var(--color-primary); }
+.text-dark { color: var(--color-dark); }
+.bg-secondary { background-color: var(--color-secondary); }
+
+/* Scrollbar verde */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #8CA98D; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #6e8a6f; }

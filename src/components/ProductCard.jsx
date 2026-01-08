@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, ShoppingTag } from 'lucide-react'; // Importamos ícono de etiqueta
+import { MessageCircle, Tag } from 'lucide-react';// Importamos ícono de etiqueta
 
 export default function ProductCard({ product }) {
   const handleBuy = () => {
